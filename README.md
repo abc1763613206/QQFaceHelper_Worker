@@ -4,8 +4,9 @@
 
 
 ## 部署实例
-已经存在的在线部署： <https://qqface.0w0.best>
-请注意 Cloudflare 到腾讯服务器的请求较慢，在触发 API 请求后请耐心等待拉取打包。
+已经存在的在线部署： <https://qqface.0w0.best>     
+
+请注意 Cloudflare 到腾讯服务器的**请求较慢**，在触发 API 请求后请耐心等待拉取打包。
 
 第三方部署请参照 `src/index.js` 。
 
