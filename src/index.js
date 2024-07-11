@@ -3,7 +3,7 @@ var JSZip = require('jszip');
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event.request))
 })
-const mduiHTML = indexPage;
+const mduiHTML = indexPage; // 如您自行部署，可直接将同目录下的 index.html 文件内容复制到此处
 
 
 async function handleRequest(request) {
