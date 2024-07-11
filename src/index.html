@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" />
+    <meta name="renderer" content="webkit" />
+
+    <link rel="stylesheet" href="https://registry.npmmirror.com/mdui/2/files/mdui.css">
+    <script src="https://registry.npmmirror.com/mdui/2/files/mdui.global.js"></script>
+
+    <title>QQFaceHelper | Workers Ver1.0</title>
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H2MFZ3VFJJ"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-H2MFZ3VFJJ');
+</script>
+
+<body>
+    <mdui-top-app-bar>
+        <mdui-top-app-bar-title>QQFaceHelper</mdui-top-app-bar-title>
+        <div style="flex-grow: 1"></div>
+        <mdui-button-icon icon="home"></mdui-button-icon>
+    </mdui-top-app-bar>
+    <mdui-dialog close-on-overlay-click class="help-overlay">
+        <h2 class="mdui-dialog-title">这是什么？</h2>
+        <p>这是 <a href="https://github.com/abc1763613206/QQFaceHelper">QQFaceHelper</a> 的 Cloudflare Workers
+            版本，可以更轻松地进行表情包的下载操作。</p>
+        <p>您可以直接输入表情包对应的 ID，当然也可以直接粘贴链接尝试自动获取。</p>
+        <p>本脚本仅供学习交流使用，严禁用于商业用途。使用此脚本即<strong>默认您已取得版权方（包括但不限于设计师、深圳市腾讯计算机系统有限公司等）的相关许可</strong>，最终所有权仍然归属于版权方。如有侵权，请联系我删除。
+        </p>
+        <h2 class="mdui-dialog-title">两个按钮的作用？</h2>
+        <p>脚本无法识别源表情包是动态的还是静态的。</p>
+        <p>因此需要您<strong>自行判断源表情包格式</strong>，并选择合适的按钮下载。</p>
+        <h2 class="mdui-dialog-title">如何获取链接？</h2>
+        <p>发送任意原创表情包，点击表情包后再次点击右下角进入表情详情，在右上角三点处「复制链接」，然后粘贴到这里。</p>
+        <p>再看不懂的话，<a href="https://cdn.jsdelivr.net/gh/abc1763613206/QQFaceHelper@main/images/howto.jpg">这里是步骤图</a>。</p>
+        <mdui-button id="help-close-btn">知道了</mdui-button>
+    </mdui-dialog>
+    <mdui-container>
+        <div class="main-input">
+            <mdui-text-field label="ID or URL" id="source" clearable
+                helper="请输入表情包页的链接，或是直接输入ID。（云端请求可能较慢，跳转后请耐心等待~）"></mdui-text-field>
+        </div>
+        <div class="center">
+            <div class="download-buttons">
+                <mdui-button raised id="static-btn">以静态方式下载(PNG)</mdui-button>
+                <mdui-button raised id="dynamic-btn">以动态方式下载(GIF)</mdui-button>
+                <mdui-button raised variant="elevated" id="help-btn">使用帮助</mdui-button>
+            </div>
+        </div>
+
+    </mdui-container>
+    <mdui-bottom-app-bar>
+        <div class="mdui-typo">Workers Ver1.0</div>
+        <div style="flex-grow: 1"></div>
+        <div></div>
+    </mdui-bottom-app-bar>
+
+</body>
+<script type="module">
+    await Promise.allSettled([
+        customElements.whenDefined('mdui-button'),
+        customElements.whenDefined('mdui-card'),
+        customElements.whenDefined('mdui-checkbox')
+    ]);
+    const dialog = document.querySelector(".help-overlay");
+    const helpBtn = document.querySelector("#help-btn");
+    const helpCloseBtn = document.querySelector("#help-close-btn");
+    const source = document.querySelector("#source");
+    const staticBtn = document.querySelector("#static-btn");
+    const dynamicBtn = document.querySelector("#dynamic-btn");
+
+    helpBtn.addEventListener("click", () => dialog.open = true);
+    helpCloseBtn.addEventListener("click", () => dialog.open = false);
+
+    staticBtn.addEventListener("click", async () => {
+        const id = source.value;
+        if (!id) {
+            mdui.snackbar({
+                message: "输入不能为空！",
+                position: "right-top"
+            });
+            return;
+        }
+        let numberId;
+        if (isNaN(id)) {
+            try {
+                if (id.indexOf("https://") === -1 && id.indexOf("http://") === -1) {
+                    id = "https://" + id;
+                }
+                const url = new URL(id.trim());
+                numberId = url.searchParams.get("id");
+            } catch (e) {
+                mdui.snackbar({
+                    message: "链接输入不合法！请勿输入多余字符！",
+                    position: "right-top"
+                });
+                return;
+            }
+        } else {
+            numberId = id;
+        }
+        console.log(numberId);
+        if (!numberId) {
+            mdui.snackbar({
+                message: "无法获取ID！请检查输入是否正确！",
+                position: "right-top"
+            });
+            return;
+        }
+        window.open('/download/' + numberId, '_blank');
+    });
+    dynamicBtn.addEventListener("click", async () => {
+        const id = source.value;
+        if (!id) {
+            mdui.snackbar({
+                message: "输入不能为空！",
+                position: "right-top"
+            });
+            return;
+        }
+        let numberId;
+        if (isNaN(id)) {
+            try {
+                if (id.indexOf("https://") === -1 && id.indexOf("http://") === -1) {
+                    id = "https://" + id;
+                }
+                const url = new URL(id.trim());
+                numberId = url.searchParams.get("id");
+            } catch (e) {
+                mdui.snackbar({
+                    message: "链接输入不合法！请勿输入多余字符！",
+                    position: "right-top"
+                });
+                return;
+            }
+        } else {
+            numberId = id;
+        }
+        console.log(numberId);
+        if (!numberId) {
+            mdui.snackbar({
+                message: "无法获取ID！请检查输入是否正确！",
+                position: "right-top"
+            });
+            return;
+        }
+        window.open('/download/' + numberId + "?dynamic=true", '_blank');
+    });
+</script>
+<style>
+    mdui-top-app-bar {
+        margin: 0 0.5rem 0;
+    }
+
+    .main-input {
+        margin: 2rem;
+    }
+
+    mdui-button {
+        margin-top: 0.5rem;
+    }
+
+    @media (max-width: 600px) {
+        .download-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+
+    }
+
+    .center {
+        display: flex;
+        justify-content: center;
+    }
+</style>
+
+</html>
