@@ -2,6 +2,9 @@ name = "qqfacehelper"
 compatibility_date = "2024-04-19"
 main = "src/index.js"
 
+[placement]
+mode = "smart"
+
 [[routes]]
 pattern = "qqface.0w0.best"
 custom_domain = true

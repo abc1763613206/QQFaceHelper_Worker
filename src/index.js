@@ -1,43 +1,43 @@
 import indexPage from './index.html'
 var JSZip = require('jszip');
-addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request))
-})
+
 const mduiHTML = indexPage; // 如您自行部署，可直接将同目录下的 index.html 文件内容复制到此处
 
+export default {
+    async fetch(request) {
+        const { pathname } = new URL(request.url)
 
-async function handleRequest(request) {
-    const { pathname } = new URL(request.url)
+        if (pathname === '/') {
+            return new Response(mduiHTML, {
+                headers: { 'Content-Type': 'text/html' }
+            })
+        }
 
-    if (pathname === '/') {
-        return new Response(mduiHTML, {
-            headers: { 'Content-Type': 'text/html' }
-        })
-    }
+        if (pathname.startsWith('/download/')) {
+            const id = parseInt(pathname.split('/')[2])
+            const dynamic = request.url.includes('dynamic=true')
 
-    if (pathname.startsWith('/download/')) {
-        const id = parseInt(pathname.split('/')[2])
-        const dynamic = request.url.includes('dynamic=true')
-
-        try {
-            const ret = await download(id, dynamic)
-            if (typeof ret === 'object') {
-                const zipFile = await createZip(ret)
-                return zipFile
-            } else {
-                return new Response(JSON.stringify({ "error": String(ret) }), {
+            try {
+                const ret = await download(id, dynamic)
+                if (typeof ret === 'object') {
+                    const zipFile = await createZip(ret)
+                    return zipFile
+                } else {
+                    return new Response(JSON.stringify({ "error": String(ret) }), {
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                }
+            } catch (e) {
+                return new Response(JSON.stringify({ "error": String(e) }), {
                     headers: { 'Content-Type': 'application/json' }
                 })
             }
-        } catch (e) {
-            return new Response(JSON.stringify({ "error": String(e) }), {
-                headers: { 'Content-Type': 'application/json' }
-            })
         }
-    }
 
-    return new Response('Not Found', { status: 404 })
+        return new Response('Not Found', { status: 404 })
+    }
 }
+
 
 async function downloadImage(imgURI) {
     const MAX_RETRY = 5;
